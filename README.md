@@ -304,9 +304,9 @@ python main.py
 
 **Step 1: Compute Total Portfolio Value**
 
-[
-\text{Total Net Worth} = \text{Cash} + \text{US Stocks} + \text{Intl Stocks} + \text{Bonds}
-]
+```math
+Total Net Worth = Cash + US Stocks + Intl Stocks + Bonds
+```
 
 ---
 
