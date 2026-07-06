@@ -244,9 +244,9 @@ Each asset is classified as:
 ---
 
 📊 All 27 Scenarios
-#| US Stocks| Intl Stocks| Bonds| Action| Interpretation|
-1| 0| 0| 0| Do nothing| Perfect equilibrium. No drift detected.|
-2| 0| 0| -| Do nothing| Minor bond weakness within tolerance.|
+#| US Stocks| Intl Stocks| Bonds| Action| Interpretation
+1| 0| 0| 0| Do nothing| Perfect equilibrium. No drift detected.
+2| 0| 0| -| Do nothing| Minor bond weakness within tolerance.
 3| 0| 0| +| Do nothing| Bonds slightly strong; no action required.
 4| 0| -| 0| Do nothing| International weakness within tolerance band.
 5| 0| +| 0| Do nothing| International strength is non-actionable.
