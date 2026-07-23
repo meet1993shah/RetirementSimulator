@@ -26,7 +26,7 @@ version = 1.0.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3, flask, werkzeug, Jinja2, itsdangerous, click, android, openssl
+requirements = python3,android,werkzeug==2.2.2,flask==2.0.1
 
 # (str) Presplash of the application
 presplash.filename = static/icon.png
@@ -49,7 +49,7 @@ fullscreen = 1
 
 # (list) Permissions
 # (See https://python-for-android.readthedocs.io/en/latest/buildoptions/#build-options-1 for all the supported syntaxes and properties)
-android.permissions = android.permission.WAKE_LOCK
+android.permissions = android.permission.WAKE_LOCK, android.permission.INTERNET, android.permission.WRITE_EXTERNAL_STORAGE, android.permission.READ_EXTERNAL_STORAGE
 
 # (str) Android logcat filters to use
 android.logcat_filters = *:S python:D
@@ -64,10 +64,10 @@ android.archs = arm64-v8a
 # (bool) enables Android auto backup feature (Android API >=23)
 android.allow_backup = True
 
-android.api = 33
-android.minapi = 24
-android.ndk = 25b
-android.extra_link_args = "-Wl,-z,max-page-size=16384"
+# android.api = 33
+# android.minapi = 24
+# android.ndk = 25b
+# android.extra_link_args = "-Wl,-z,max-page-size=16384"
 
 # (str) python-for-android branch to use, defaults to master
 p4a.branch = master
