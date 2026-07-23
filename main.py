@@ -1,9 +1,14 @@
 import json
 import time
-import numpy as np
+import math
+import random
 from flask import Flask, render_template, request, Response
+import platform
+import os
 
 app = Flask(__name__)
+# Secret key is essential for Flask sessions to work
+app.secret_key = os.urandom(24)
 
 # Full 1928-2025 Historical Baseline (S&P 500, Bonds, CPI)
 SP500_HIST = [
@@ -45,16 +50,19 @@ CPI_HIST = [
     0.0191, 0.0229, 0.0136, 0.0704, 0.0645, 0.034, 0.03, 0.027
 ]
 
-np.random.seed(42)
-INTL_HIST = [r * 0.8 + np.random.normal(0, 0.05) for r in SP500_HIST]
-HIST_DATA = np.column_stack((SP500_HIST, INTL_HIST, BONDS_HIST, CPI_HIST))
+random.seed(random.randint(1, 100))
+INTL_HIST = [r * 0.8 + random.gauss(0, 0.05) for r in SP500_HIST]
+
+# Combine into a list of tuples: (sp, intl, bonds, cpi)
+HIST_DATA = list(zip(SP500_HIST, INTL_HIST, BONDS_HIST, CPI_HIST))
 
 def get_block_bootstrap_returns(data, n_years, block_size):
-    n_blocks = int(np.ceil(n_years / block_size))
+    n_blocks = math.ceil(n_years / block_size)
     max_start_idx = len(data) - block_size
-    block_indices = np.random.randint(0, max_start_idx + 1, size=n_blocks)
-    blocks = [data[i : i + block_size] for i in block_indices]
-    returns_sequence = np.vstack(blocks)
+    returns_sequence = []
+    for _ in range(n_blocks):
+        start_idx = random.randint(0, max_start_idx)
+        returns_sequence.extend(data[start_idx : start_idx + block_size])
     return returns_sequence[:n_years]
 
 @app.route('/')
@@ -160,4 +168,10 @@ def stream_simulation():
     return Response(generate(), mimetype='text/event-stream')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    if platform.system() == 'Android':
+        try:
+            from android.permissions import Permission, request_permissions
+            request_permissions([Permission.INTERNET, Permission.WAKE_LOCK])
+        except ImportError:
+            pass
+    app.run(host='0.0.0.0', port=8080, debug=False, threaded=True)
