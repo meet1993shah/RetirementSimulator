@@ -26,7 +26,7 @@ version = 1.0.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,android,werkzeug==2.2.2,flask==2.0.1
+requirements = python3,android,werkzeug==2.3.7,flask==2.3.3
 
 # (str) Presplash of the application
 presplash.filename = static/icon.png
