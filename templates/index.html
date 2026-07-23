@@ -3,109 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3-Fund 60/20/20 Portfolio Engine</title>
+    <title>Live Retirement Portfolio Simulator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Include Chart.js for real-time plotting -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1>Retirement Portfolio Simulator</h1>
+            <p>Live Server-Sent Events (SSE) Block-Bootstrap Monte Carlo Engine</p>
+        </header>
 
-    <header class="app-header">
-        <div class="brand-title">3-Fund (60/20/20) Threshold Allocation Engine</div>
-        <div class="system-status" id="systemStatus">Engine Status: Ready</div>
-    </header>
-
-    <main class="viewport-container">
-        <section class="control-panel">
-            <form id="simulationParametersForm" class="parameters-form">
-                <div class="input-group">
-                    <label for="net_worth">Starting Portfolio Net Worth ($)</label>
-                    <input type="number" id="net_worth" name="net_worth" value="1000000" step="any" required>
-                </div>
-
-                <div class="input-group">
-                    <label for="expenses">Initial Annual Spending ($)</label>
-                    <input type="number" id="expenses" name="expenses" value="27500" step="any" required>
-                </div>
-
-                <div class="input-group-row">
+        <div class="main-layout">
+            <aside class="control-panel">
+                <form id="sim-form">
                     <div class="input-group">
-                        <label for="us_stock_rate">US Equity CAGR</label>
-                        <input type="number" id="us_stock_rate" name="us_stock_rate" min="-0.20" max="0.40" step="0.001" value="0.08" required>
+                        <label>US Equities Allocation (%)</label>
+                        <input type="number" id="us_alloc" value="60" step="1">
                     </div>
                     <div class="input-group">
-                        <label for="us_stock_sigma">US Volatility (SD)</label>
-                        <input type="number" id="us_stock_sigma" name="us_stock_sigma" min="0.01" max="0.80" step="0.001" value="0.15" required>
-                    </div>
-                </div>
-
-                <div class="input-group-row">
-                    <div class="input-group">
-                        <label for="intl_stock_rate">Intl Equity CAGR</label>
-                        <input type="number" id="intl_stock_rate" name="intl_stock_rate" min="-0.20" max="0.40" step="0.001" value="0.072" required>
+                        <label>Intl Equities Allocation (%)</label>
+                        <input type="number" id="intl_alloc" value="20" step="1">
                     </div>
                     <div class="input-group">
-                        <label for="intl_stock_sigma">Intl Volatility (SD)</label>
-                        <input type="number" id="intl_stock_sigma" name="intl_stock_sigma" min="0.01" max="0.80" step="0.001" value="0.18" required>
+                        <label>Bonds Allocation (%)</label>
+                        <input type="number" id="bond_alloc" value="20" step="1">
                     </div>
-                </div>
-
-                <div class="input-group">
-                    <label for="bond_rate">Expected Bond Return Rate</label>
-                    <input type="number" id="bond_rate" name="bond_rate" min="0.0" max="0.20" step="0.001" value="0.04" required>
-                </div>
-
-                <div class="input-group">
-                    <label for="inflation_rate">Expected Long-Term Inflation</label>
-                    <input type="number" id="inflation_rate" name="inflation_rate" min="-0.05" max="0.25" step="0.001" value="0.025" required>
-                </div>
-
-                <div class="input-group">
-                    <label for="horizon">Retirement Horizon (Years)</label>
-                    <input type="number" id="horizon" name="horizon" min="1" max="100" value="65" required>
-                </div>
-
-                <div class="input-group">
-                    <label for="num_simulations">Monte Carlo Cycles / Trials</label>
-                    <input type="number" id="num_simulations" name="num_simulations" min="1" max="10000" value="2000" required>
-                </div>
-
-                <div class="action-container">
-                    <button type="submit" id="simulateBtn" class="btn btn-primary">Run Monte Carlo Simulation</button>
-                </div>
-
-                <div class="progress-wrapper idled" id="progressWrapper">
-                    <div class="progress-label-container">
-                        <span>Array Processing Progress</span>
-                        <span id="progressBarPct">0%</span>
+                    <div class="input-group">
+                        <label>Number of Simulations</label>
+                        <input type="number" id="n_sims" value="500" step="100">
                     </div>
-                    <div class="progress-track">
-                        <div class="progress-fill" id="progressBarFill"></div>
+                    <div class="input-group">
+                        <label>Retirement Horizon (Years)</label>
+                        <input type="number" id="n_years" value="65" step="1">
                     </div>
-                </div>
-            </form>
-        </section>
+                    <div class="input-group">
+                        <label>Block Size (Years)</label>
+                        <input type="number" id="block_size" value="5" step="1">
+                    </div>
+                    <div class="input-group">
+                        <label>US Drift Threshold (%)</label>
+                        <input type="number" id="drift_pct" value="5" step="0.5">
+                    </div>
+                    <div class="input-group">
+                        <label>Bear Market Drawdown (%)</label>
+                        <input type="number" id="drawdown_pct" value="20" step="1">
+                    </div>
+                    <div class="input-group">
+                        <label>Initial SWR (%)</label>
+                        <input type="number" id="initial_swr" value="1" step="0.05">
+                    </div>
+                    <div class="input-group">
+                        <label>Step SWR (%)</label>
+                        <input type="number" id="step_swr" value="0.05" step="0.05">
+                    </div>
+                    <div class="input-group">
+                        <label>Success Threshold (%)</label>
+                        <input type="number" id="success_threshold" value="90" step="1">
+                    </div>
+                    <button type="submit" id="run-btn">Run Live Simulation</button>
+                </form>
+            </aside>
 
-        <section class="visualization-space">
-            <div class="metrics-grid">
-                <div class="metric-card success">
-                    <div class="metric-title">Portfolio Success Rate</div>
-                    <div class="metric-value" id="valSuccessRate">--%</div>
+            <main class="output-panel">
+                <div id="status-text" class="placeholder-text">Configure parameters and click run to stream results live.</div>
+                <div class="chart-container">
+                    <canvas id="simChart"></canvas>
                 </div>
-                <div class="metric-card info">
-                    <div class="metric-title">Successful Runs</div>
-                    <div class="metric-value" id="valSuccessfulRuns">--</div>
-                </div>
-                <div class="metric-card danger">
-                    <div class="metric-title">Insolvency Events</div>
-                    <div class="metric-value" id="valInsolventRuns">--</div>
-                </div>
-                <div class="metric-card warning">
-                    <div class="metric-title">Avg Insolvency Timeline</div>
-                    <div class="metric-value" id="valAvgInsolvencyYear">Year --</div>
-                </div>
-            </div>
-        </section>
-    </main>
-
+            </main>
+        </div>
+    </div>
     <script src="{{ url_for('static', filename='index.js') }}"></script>
 </body>
 </html>

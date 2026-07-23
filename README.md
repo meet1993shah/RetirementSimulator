@@ -1,12 +1,8 @@
-# 3-Fund (60/20/20) Threshold Allocation Engine & Retirement Simulator
+# 3-Fund Retirement Simulator
 
 ---
 
-* A low-maintenance, highly resilient retirement planning tool and Monte Carlo simulation engine designed for long-term financial independence. The simulator models a sustainable 65-year retirement using an 80% Equity (60% US / 20% International) and 20% Fixed Income portfolio, supported by a 12-month cash reserve and a threshold-based rebalancing strategy.
-
-* Rather than continuously rebalancing, the engine performs portfolio reviews only twice per year, allowing assets to drift naturally while minimizing unnecessary transactions. Spending is funded through a dedicated cash reserve, reducing the likelihood of selling long-term investments during unfavorable market conditions.
-
-* The application uses Flask together with Server-Sent Events (SSE) and the JavaScript Streams API to provide real-time simulation progress updates without requiring page refreshes.
+A lightweight Flask web application that models long-term retirement portfolio survival rates using **Block Bootstrap Monte Carlo simulations** (historical data spanning 1928–2025) combined with dynamic cash buffer protection rules.
 
 ---
 
@@ -65,16 +61,6 @@ python main.py
 
 ---
 
-### Cash Buffer
-
-* At initialization, the engine immediately separates one full year of inflation-adjusted living expenses into a dedicated cash reserve ("self.cash").
-
-* This reserve serves as the primary spending account throughout retirement.
-
-* All regular withdrawals are funded from cash first, allowing the investment portfolio to remain untouched whenever possible.
-
----
-
 ### Spending Order
 
 * The withdrawal hierarchy follows a deterministic order:
@@ -122,22 +108,6 @@ python main.py
 
 ---
 
-### Monte Carlo Simulation Engine
-
-* The retirement simulator performs thousands of independent market simulations using randomized annual returns for each asset class.
-
-* Each simulation models:
-  - Portfolio growth
-  - Inflation-adjusted spending
-  - Cash reserve depletion
-  - Threshold-based rebalancing
-  - Portfolio longevity
-  - Success or failure over the complete retirement horizon
-
-* Because every simulation is independent, the engine can estimate long-term retirement success probabilities under a wide variety of market environments.
-
----
-
 ### Real-Time Progress Streaming
 
 * Long-running Monte Carlo simulations are streamed to the browser using Server-Sent Events (SSE).
@@ -179,9 +149,9 @@ python main.py
 
 |Frequency| Time| Action| Checklist|
 |----|----|----|----|
-|Monthly| Automatic| Cash → Checking| Maintain an automatic monthly transfer from your Cash Buffer (brokerage settlement account or HYSA) into your checking account to cover living expenses. No investment transactions are required.|
-|Semi-Annual| January 2| Full Portfolio Review| 1. Update your annual spending amount for inflation.<br>2. Calculate current asset allocations relative to the investable portfolio.<br>3. Determine whether any allocation has exceeded the ±5% threshold.<br>4. Execute the appropriate scenario from the rebalancing matrix.<br>5. Refill the Cash Buffer if required by that scenario.|
-|Semi-Annual| July 2| Mid-Year Portfolio Review| 1. Review remaining Cash Buffer runway.<br>2. Recalculate portfolio allocations.<br>3. Determine whether any asset has breached the ±5% threshold.<br>4. Execute trades only if a threshold has been crossed. Otherwise, take no action.|
+|Monthly| Automatic| Cash → Checking| 1. Automate recurring transfer from savings to checking for spending every month. <br>2. Direct all portfolio dividends (VTI, VXUS) into Cash Buffer rather than auto-reinvesting. <br>3. Direct all bond yields (BND) into Cash Buffer rather than auto-reinvesting.|
+|Semi-Annual| January 2| Full Portfolio Review| 1. Calculate inflation-adjusted spending budget. <br>2. Check asset weights against +/- 5% drift threshold. <br>3. Check Market Drawdown (>15% drop). <br>4. Execute Decision Matrix.|
+|Semi-Annual| July 2| Mid-Year Portfolio Review| 1. Calculate inflation-adjusted spending budget. <br>2. Check asset weights against +/- 5% drift threshold. <br>3. Check Market Drawdown (>15% drop). <br>4. Execute Decision Matrix.|
 
 ---
 
@@ -219,7 +189,7 @@ python main.py
 
 ---
 
-### 🧭 Table 3: Complete 27-Scenario Rebalancing & Extraction Matrix
+### 🧭 Table 3: Complete Scenario Rebalancing & Extraction Matrix
 
 * At each January and July review, determine whether each investable asset class is:
 
@@ -227,106 +197,32 @@ python main.py
   - In-Band (0) — Within its allowable range / Within ±5% range
   - Underweight (-) — Below its lower threshold / Below target
 
-* This creates 27 possible portfolio states (3 × 3 × 3).
-
 * For each state, execute the corresponding action exactly as described in the following matrix.
 
 **«Important:** If no asset class has crossed its threshold, do nothing. The strategy intentionally avoids unnecessary rebalancing.»
 
 ---
 
-### 📊 All 27 Scenarios
-| # | US Stocks| Intl Stocks| Bonds| Action| Interpretation |
-|----|----|----|----|----|----|
-|1| 0| 0| 0| Do nothing| Perfect equilibrium. No drift detected.|
-|2| 0| 0| -| Do nothing| Minor bond weakness within tolerance.|
-|3| 0| 0| +| Do nothing| Bonds slightly strong; no action required.|
-|4| 0| -| 0| Do nothing| International weakness within tolerance band.|
-|5| 0| +| 0| Do nothing| International strength is non-actionable.|
-|6| -| 0| 0| Do nothing| US equities slightly weak but within band.|
-|7| +| 0| 0| Do nothing| US equities slightly strong but within band.|
-|8| +| 0| -| Sell US → refill Cash → Buy Bonds| US bull run harvested into fixed income.|
-|9| 0| +| -| Sell Intl → refill Cash → Buy Bonds| International gains redirected to bonds.|
-|10| +| +| -| Sell both equities → refill Cash → Buy Bonds| Broad equity rally, de-risk into bonds.|
-|11| +| -| 0| Sell US → refill Cash → Buy Intl| Rotate from US into cheaper international equity.|
-|12| -| +| 0| Sell Intl → refill Cash → Buy US| Rotate from international into US equities.|
-|13| +| -| -| Sell US → refill Cash → Rebalance Intl + Bonds| US outperformance funds underweight assets.|
-|14| -| +| -| Sell Intl → refill Cash → Rebalance US + Bonds| International outperformance redistributed.|
-|15| -| 0| +| Sell Bonds → refill Cash → Buy US Stocks| Bonds fund US equity recovery.|
-|16| 0| -| +| Sell Bonds → refill Cash → Buy Intl Stocks| Bonds fund international recovery.|
-|17| -| -| +| Sell Bonds → refill Cash → Buy both equities| Bonds deployed into broad equity drawdown.|
-|18| -| +| +| Sell Bonds + Intl → refill Cash → Buy US Stocks| US equity underperformance corrected.|
-|19| +| -| +| Sell Bonds + US → refill Cash → Buy Intl Stocks| International equities become target allocation.|
-|20| -| -| -| Do nothing| Deep systemic drawdown; cash buffer absorbs spending.|
-|21| +| +| +| Do nothing| Broad market expansion; no structural imbalance.|
-|22| 0| -| -| Do nothing| Mild international + bond weakness within tolerance.|
-|23| 0| +| +| Do nothing| International + bonds strong but not actionable.|
-|24| -| 0| -| Do nothing| US + bonds weak but within tolerance.|
-|25| +| 0| +| Do nothing| Multi-asset strength without drift violation.|
-|26| -| +| -| Sell Intl → refill Cash → Buy US + Bonds| International outperformance harvested.|
-|27| +| -| 0| Sell US → refill Cash → Buy Intl| US outperformance rotated into international.|
-
----
-
-### 🧠 System Behavior Summary
-
-* The full 27-scenario engine encodes the following behaviors:
-
-1. **Cash Buffer Priority**
-
-    * All actions route through cash first, ensuring liquidity stability for ongoing withdrawals.
-
-1. **Bonds as Primary Liquidity Source**
-
-    * Bonds are the default funding source for portfolio rebalancing during equity stress environments.
-
-1. **Equity Mean Reversion**
-
-    * The system systematically:
-      - Sells high-performing equities
-      - Buys underperforming equities
-      - Maintains long-term allocation balance without frequent intervention
-
-1. **Rare Extreme States**
-
-    * Certain scenarios intentionally trigger no action, even during volatility, because:
-      - Cash buffer absorbs spending pressure
-      - Temporary mispricings are allowed to persist
-      - Over-trading is explicitly avoided
-
----
-
-### 🛠️ Automated Fallback Guideline
-
-* If manual intervention is required during extreme volatility or system uncertainty, use the following deterministic procedure:
-
----
-
-**Step 1: Compute Total Portfolio Value**
-
-```math
-Total Net Worth = Cash + US Stocks + Intl Stocks + Bonds
-```
-
----
-
-**Step 2: Rebuild Cash Buffer**
-
-Set aside:
-
-«1 Year of Inflation-Adjusted Living Expenses»
-
-Transfer this amount into the Cash Buffer (HYSA / Settlement Account).
-
----
-
-**Step 3: Reallocate Remaining Portfolio**
-
-Take all remaining capital and rebalance strictly into:
-
-- 60% US Stocks (VTI)
-- 20% International Stocks (VXUS)
-- 20% Bonds (BND)
+### 📊 All Scenarios
+| US Stocks | Intl Stocks | Bonds | Market Condition | Cash Target | Primary Harvest Action | Capital Allocation Protocol | Strategic Intent |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| In-Band | In-Band | In-Band | Any | Maintain Current | None | Draw cash for living expenses. If cash reaches 0, execute proportional drawdown (60% VTI / 20% VXUS / 20% BND) in 3-month blocks. | Equilibrium. Maintain holdings and do not interrupt compounding. |
+| Over (+) | In-Band | Under (-) | Normal / Bull | 12 Months | Sell US Stocks down to target | 1. Top off Cash Buffer to 12 months.<br>2. Allocate 100% of remaining proceeds into Bonds. | Domestic bull run. Lock in living runway and buy bonds at a discount. |
+| Over (+) | Under (-) | In-Band | Normal / Bull | 12 Months | Sell US Stocks down to target | 1. Top off Cash Buffer to 12 months.<br>2. Use remaining proceeds to buy Intl Stocks up to target. | Divergent equity behavior. Harvest domestic gains to buy cheaper international assets. |
+| Over (+) | Under (-) | Over (+) | Normal / Bull | 12 Months | Sell US Stocks & Bonds down to target | 1. Top off Cash Buffer to 12 months.<br>2. Buy Intl Stocks up to target weight. | Mixed environment. Harvest domestic gains and bonds to fund international value. |
+| Over (+) | Under (-) | Under (-) | Normal / Bull | 12 Months | Sell US Stocks down to target | 1. Top off Cash Buffer to 12 months.<br>2. Allocate remaining proceeds to bring both Intl Stocks and Bonds to target. | Mega domestic bull run. Outperformance normalizes laggards across the portfolio. |
+| Over (+) | Over (+) | Under (-) | Normal / Bull | 12 Months | Sell both US & Intl Stocks down to target | 1. Top off Cash Buffer to 12 months.<br>2. Allocate 100% of remaining proceeds into Bonds. | Global equity boom. Skim excess gains across all stocks to reinforce safe reserves. |
+| In-Band | Over (+) | Under (-) | Normal / Bull | 12 Months | Sell Intl Stocks down to target | 1. Top off Cash Buffer to 12 months.<br>2. Allocate 100% of remaining proceeds into Bonds. | International bull run. Harvest global gains to reinforce fixed-income floor. |
+| Under (-) | Over (+) | In-Band | Normal / Bull | 12 Months | Sell Intl Stocks down to target | 1. Top off Cash Buffer to 12 months.<br>2. Use remaining proceeds to buy US Stocks up to target. | Reverse divergence. Harvest international outperformance to buy discounted domestic stocks. |
+| Under (-) | Over (+) | Under (-) | Normal / Bull | 12 Months | Sell Intl Stocks down to target | 1. Top off Cash Buffer to 12 months.<br>2. Allocate remaining proceeds to bring both US Stocks and Bonds to target. | Mega international bull run. Reallocate international windfall to balance domestic stocks and bonds. |
+| Under (-) | Over (+) | Over (+) | Minor Dip (<15%) | 12 Months | Sell Bonds & Intl Stocks down to target | 1. Top off Cash Buffer to 12 months.<br>2. Buy US Stocks back to target weight. | Mixed environment. Move excess global index and bond funds into domestic stocks. |
+| Under (-) | Over (+) | Over (+) | Crash (>15%) | 6 Months | Sell Bonds & Intl Stocks down to target | 1. Top off Cash Buffer to 6 months ONLY.<br>2. Allocate ALL remaining proceeds to buy discounted US Stocks. | Crash execution. Harvest firm assets to load up on heavily discounted domestic shares. |
+| Under (-) | In-Band | Over (+) | Minor Dip (<15%) | 12 Months | Sell Bonds down to target | 1. Top off Cash Buffer to 12 months.<br>2. Buy US Stocks up to target with remaining proceeds. | Standard rebalance. Preserve 12-month cushion while buying minor equity dips. |
+| Under (-) | In-Band | Over (+) | Crash (>15%) | 6 Months | Sell Bonds down to target | 1. Top off Cash Buffer to 6 months ONLY.<br>2. Allocate ALL excess proceeds to buy discounted US Stocks. | Bear Market Rule. Bond shield active. Maximize buying power in cheap domestic equities. |
+| In-Band | Under (-) | Over (+) | Minor Dip (<15%) | 12 Months | Sell Bonds down to target | 1. Top off Cash Buffer to 12 months.<br>2. Buy Intl Stocks up to target with remaining proceeds. | Standard rebalance. Preserve 12-month cushion while buying international value. |
+| In-Band | Under (-) | Over (+) | Crash (>15%) | 6 Months | Sell Bonds down to target | 1. Top off Cash Buffer to 6 months ONLY.<br>2. Allocate ALL excess proceeds to buy discounted Intl Stocks. | Bear Market Rule. Fixed income harvested to fund discounted international equities. |
+| Under (-) | Under (-) | Over (+) | Minor Dip (<15%) | 12 Months | Sell Bonds down to target | 1. Top off Cash Buffer to 12 months.<br>2. Buy US and Intl Stocks back to target weight. | Standard global dip. Preserve 12-month runway and rebalance stock allocations. |
+| Under (-) | Under (-) | Over (+) | Crash (>15%) | 6 Months | Sell Bonds down to target | 1. Top off Cash Buffer to 6 months ONLY.<br>2. Split excess proceeds 75/25 to buy US & Intl Stocks back to target. | Severe Bear Market. Fixed income acts as emergency reserve; maximize equity buying at market bottom. |
 
 ---
 

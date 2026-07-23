@@ -1,124 +1,106 @@
-class SimulationDashboard {
-    constructor() {
-        this.form = document.getElementById('simulationParametersForm');
-        this.submitBtn = document.getElementById('simulateBtn');
-        this.statusText = document.getElementById('systemStatus');
-        
-        // Progress elements
-        this.progressWrapper = document.getElementById('progressWrapper');
-        this.progressBarFill = document.getElementById('progressBarFill');
-        this.progressBarPct = document.getElementById('progressBarPct');
-        
-        // Scorecard elements
-        this.domSuccessRate = document.getElementById('valSuccessRate');
-        this.domSuccessfulRuns = document.getElementById('valSuccessfulRuns');
-        this.domInsolventRuns = document.getElementById('valInsolventRuns');
-        this.domAvgInsolvencyYear = document.getElementById('valAvgInsolvencyYear');
-        
-        this.registerEventHandlers();
+let simChart = null;
+
+document.getElementById('sim-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const statusText = document.getElementById('status-text');
+    statusText.textContent = "Running live simulation... streaming data points.";
+    
+    const payload = {
+        us_alloc: document.getElementById('us_alloc').value,
+        intl_alloc: document.getElementById('intl_alloc').value,
+        bond_alloc: document.getElementById('bond_alloc').value,
+        n_sims: document.getElementById('n_sims').value,
+        n_years: document.getElementById('n_years').value,
+        block_size: document.getElementById('block_size').value,
+        drift_pct: document.getElementById('drift_pct').value,
+        drawdown_pct: document.getElementById('drawdown_pct').value,
+        initial_swr: document.getElementById('initial_swr').value,
+        step_swr: document.getElementById('step_swr').value,
+        success_threshold: document.getElementById('success_threshold').value
+    };
+    
+    // Destroy existing chart if present
+    if (simChart) {
+        simChart.destroy();
     }
-
-    registerEventHandlers() {
-        this.form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.executeBatchSimulation();
-        });
-    }
-
-    async executeBatchSimulation() {
-        this.setEngineState(true, 'Engine Status: Initializing SSE Stream...');
-        this.updateProgressBar(0);
-        this.progressWrapper.classList.remove('idled');
-
-        const formData = new FormData(this.form);
-        const payload = {
-            net_worth: parseFloat(formData.get('net_worth')),
-            expenses: parseFloat(formData.get('expenses')),
-            us_stock_rate: parseFloat(formData.get('us_stock_rate')),
-            us_stock_sigma: parseFloat(formData.get('us_stock_sigma')),
-            intl_stock_rate: parseFloat(formData.get('intl_stock_rate')),
-            intl_stock_sigma: parseFloat(formData.get('intl_stock_sigma')),
-            bond_rate: parseFloat(formData.get('bond_rate')),
-            inflation_rate: parseFloat(formData.get('inflation_rate')),
-            horizon: parseInt(formData.get('horizon'), 10),
-            num_simulations: parseInt(formData.get('num_simulations'), 10)
-        };
-
-        try {
-            const response = await fetch('/api/simulate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) throw new Error('Simulation stream configuration rejected.');
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder('utf-8');
-            let buffer = '';
-
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) break;
-
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n\n');
-                buffer = lines.pop(); // Save trailing unfinished line back to the buffer
-
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const rawJson = line.substring(6).trim();
-                        if (!rawJson) continue;
-                        
-                        const msg = JSON.parse(rawJson);
-                        if (msg.type === 'progress') {
-                            this.updateProgressBar(msg.percentage);
-                            this.statusText.innerText = `Engine Status: Running Cycles (${msg.percentage}%)`;
-                        } else if (msg.type === 'final') {
-                            this.renderFinalMetrics(msg);
-                        }
-                    }
+    
+    // Initialize Chart.js configuration
+    const ctx = document.getElementById('simChart').getContext('2d');
+    simChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Success Rate (%)',
+                data: [],
+                borderColor: '#2563eb',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                borderWidth: 2,
+                pointRadius: 3,
+                fill: true,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: { display: true, text: 'Initial Withdrawal Rate (%)' }
+                },
+                y: {
+                    min: success_threshold-5,
+                    max: 100,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    title: { display: true, text: 'Success Rate (%)' }
                 }
             }
-            
-            this.setEngineState(false, 'Engine Status: Idle');
-        } catch (err) {
-            console.error(err);
-            this.setEngineState(false, 'Engine Status: Stream Fault Error');
         }
-    }
-
-    updateProgressBar(pct) {
-        this.progressBarFill.style.width = `${pct}%`;
-        this.progressBarPct.innerText = `${pct}%`;
-    }
-
-    renderFinalMetrics(data) {
-        this.domSuccessRate.innerText = `${data.success_rate_pct}%`;
-        this.domSuccessfulRuns.innerText = data.successful_runs.toLocaleString();
-        this.domInsolventRuns.innerText = data.insolvent_runs.toLocaleString();
+    });
+    
+    // Trigger Server-Sent Events via fetch POST (using response body reader)
+    fetch('/stream-simulation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    }).then(response => {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
         
-        if (data.insolvent_runs > 0) {
-            this.domAvgInsolvencyYear.innerText = `Year ${data.avg_insolvency_year}`;
-        } else {
-            this.domAvgInsolvencyYear.innerText = 'No Ruin';
+        function readStream() {
+            reader.read().then(({ done, value }) => {
+                if (done) {
+                    statusText.textContent = "Simulation completed successfully!";
+                    return;
+                }
+                
+                buffer += decoder.decode(value, { stream: true });
+                let lines = buffer.split('\n\n');
+                buffer = lines.pop(); // Keep incomplete chunk
+                
+                lines.forEach(line => {
+                    if (line.startsWith('data: ')) {
+                        const jsonStr = line.replace('data: ', '');
+                        const data = JSON.parse(jsonStr);
+                        
+                        // Append live data point to Chart.js
+                        simChart.data.labels.push(data.rate.toFixed(2) + '%');
+                        simChart.data.datasets[0].data.push(data.success);
+                        simChart.update('none'); // Update smoothly without full re-animation
+                    }
+                });
+                
+                readStream();
+            }).catch(err => {
+                console.error("Stream reading error:", err);
+                statusText.textContent = "Error occurred during streaming.";
+            });
         }
-    }
-
-    setEngineState(isLoading, text) {
-        this.statusText.innerText = text;
-        if (isLoading) {
-            this.submitBtn.disabled = true;
-            this.submitBtn.style.opacity = '0.6';
-            this.submitBtn.innerText = 'Streaming MC Nodes...';
-        } else {
-            this.submitBtn.disabled = false;
-            this.submitBtn.style.opacity = '1.0';
-            this.submitBtn.innerText = 'Run Monte Carlo Simulation';
-        }
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    window.AppEngineInstance = new SimulationDashboard();
+        
+        readStream();
+    });
 });
