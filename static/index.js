@@ -1,10 +1,24 @@
 let simChart = null;
 
+// Collapsible Control Panel Toggle
+document.getElementById('collapse-btn').addEventListener('click', function() {
+    const controlPanel = document.getElementById('control-panel');
+    const isCollapsed = controlPanel.classList.toggle('collapsed');
+    this.textContent = isCollapsed ? 'Expand Inputs 🔽' : 'Collapse Inputs 🔼';
+});
+
 document.getElementById('sim-form').addEventListener('submit', function(e) {
     e.preventDefault();
     
     const statusText = document.getElementById('status-text');
     statusText.textContent = "Running live simulation... streaming data points.";
+    
+    // Automatically collapse inputs card when simulation starts to maximize chart view
+    const controlPanel = document.getElementById('control-panel');
+    controlPanel.classList.add('collapsed');
+    document.getElementById('collapse-btn').textContent = 'Expand Inputs 🔽';
+    
+    const successThreshold = parseFloat(document.getElementById('success_threshold').value) || 90;
     
     const payload = {
         us_alloc: document.getElementById('us_alloc').value,
@@ -17,7 +31,7 @@ document.getElementById('sim-form').addEventListener('submit', function(e) {
         drawdown_pct: document.getElementById('drawdown_pct').value,
         initial_swr: document.getElementById('initial_swr').value,
         step_swr: document.getElementById('step_swr').value,
-        success_threshold: document.getElementById('success_threshold').value
+        success_threshold: successThreshold
     };
     
     // Destroy existing chart if present
@@ -34,8 +48,8 @@ document.getElementById('sim-form').addEventListener('submit', function(e) {
             datasets: [{
                 label: 'Success Rate (%)',
                 data: [],
-                borderColor: '#2563eb',
-                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                borderColor: '#4f46e5',
+                backgroundColor: 'rgba(79, 70, 229, 0.1)',
                 borderWidth: 2,
                 pointRadius: 3,
                 fill: true,
@@ -50,7 +64,7 @@ document.getElementById('sim-form').addEventListener('submit', function(e) {
                     title: { display: true, text: 'Initial Withdrawal Rate (%)' }
                 },
                 y: {
-                    min: success_threshold-5,
+                    min: Math.max(0, successThreshold - 5),
                     max: 100,
                     ticks: {
                         stepSize: 1

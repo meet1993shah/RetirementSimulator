@@ -11,61 +11,69 @@
 <body>
     <div class="container">
         <header>
-            <h1>Retirement Portfolio Simulator</h1>
-            <p>Live Server-Sent Events (SSE) Block-Bootstrap Monte Carlo Engine</p>
+            <div class="header-title-row">
+                <div>
+                    <h1>Retirement Portfolio Simulator</h1>
+                </div>
+                <button type="button" id="collapse-btn" class="collapse-btn">Collapse Inputs 🔼</button>
+            </div>
         </header>
 
         <div class="main-layout">
-            <aside class="control-panel">
+            <!-- Top Panel: Inputs Card -->
+            <section class="control-panel" id="control-panel">
                 <form id="sim-form">
-                    <div class="input-group">
-                        <label>US Equities Allocation (%)</label>
-                        <input type="number" id="us_alloc" value="60" step="1">
-                    </div>
-                    <div class="input-group">
-                        <label>Intl Equities Allocation (%)</label>
-                        <input type="number" id="intl_alloc" value="20" step="1">
-                    </div>
-                    <div class="input-group">
-                        <label>Bonds Allocation (%)</label>
-                        <input type="number" id="bond_alloc" value="20" step="1">
-                    </div>
-                    <div class="input-group">
-                        <label>Number of Simulations</label>
-                        <input type="number" id="n_sims" value="500" step="100">
-                    </div>
-                    <div class="input-group">
-                        <label>Retirement Horizon (Years)</label>
-                        <input type="number" id="n_years" value="65" step="1">
-                    </div>
-                    <div class="input-group">
-                        <label>Block Size (Years)</label>
-                        <input type="number" id="block_size" value="5" step="1">
-                    </div>
-                    <div class="input-group">
-                        <label>US Drift Threshold (%)</label>
-                        <input type="number" id="drift_pct" value="5" step="0.5">
-                    </div>
-                    <div class="input-group">
-                        <label>Bear Market Drawdown (%)</label>
-                        <input type="number" id="drawdown_pct" value="20" step="1">
-                    </div>
-                    <div class="input-group">
-                        <label>Initial SWR (%)</label>
-                        <input type="number" id="initial_swr" value="1" step="0.05">
-                    </div>
-                    <div class="input-group">
-                        <label>Step SWR (%)</label>
-                        <input type="number" id="step_swr" value="0.05" step="0.05">
-                    </div>
-                    <div class="input-group">
-                        <label>Success Threshold (%)</label>
-                        <input type="number" id="success_threshold" value="90" step="1">
+                    <div class="inputs-grid">
+                        <div class="input-group">
+                            <label>US Equities Allocation (%)</label>
+                            <input type="number" id="us_alloc" value="60" step="1">
+                        </div>
+                        <div class="input-group">
+                            <label>Intl Equities Allocation (%)</label>
+                            <input type="number" id="intl_alloc" value="20" step="1">
+                        </div>
+                        <div class="input-group">
+                            <label>Bonds Allocation (%)</label>
+                            <input type="number" id="bond_alloc" value="20" step="1">
+                        </div>
+                        <div class="input-group">
+                            <label>Number of Simulations</label>
+                            <input type="number" id="n_sims" value="500" step="100">
+                        </div>
+                        <div class="input-group">
+                            <label>Retirement Horizon (Years)</label>
+                            <input type="number" id="n_years" value="65" step="1">
+                        </div>
+                        <div class="input-group">
+                            <label>Block Size (Years)</label>
+                            <input type="number" id="block_size" value="5" step="1">
+                        </div>
+                        <div class="input-group">
+                            <label>US Drift Threshold (%)</label>
+                            <input type="number" id="drift_pct" value="5" step="0.5">
+                        </div>
+                        <div class="input-group">
+                            <label>Bear Market Drawdown (%)</label>
+                            <input type="number" id="drawdown_pct" value="20" step="1">
+                        </div>
+                        <div class="input-group">
+                            <label>Initial SWR (%)</label>
+                            <input type="number" id="initial_swr" value="1" step="0.05">
+                        </div>
+                        <div class="input-group">
+                            <label>Step SWR (%)</label>
+                            <input type="number" id="step_swr" value="0.05" step="0.05">
+                        </div>
+                        <div class="input-group">
+                            <label>Success Threshold (%)</label>
+                            <input type="number" id="success_threshold" value="90" step="1">
+                        </div>
                     </div>
                     <button type="submit" id="run-btn">Run Live Simulation</button>
                 </form>
-            </aside>
+            </section>
 
+            <!-- Bottom Panel: Chart Output -->
             <main class="output-panel">
                 <div id="status-text" class="placeholder-text">Configure parameters and click run to stream results live.</div>
                 <div class="chart-container">
