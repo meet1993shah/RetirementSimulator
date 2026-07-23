@@ -6,6 +6,10 @@ A lightweight Flask web application that models long-term retirement portfolio s
 
 ---
 
+## Demo
+
+![](demo/demo.gif)
+
 ## 🚀 Quick Start
 
 Prerequisites
@@ -245,5 +249,34 @@ This system is built on four long-term principles:
 1. Behavioral Isolation
 
     * Rules are deterministic and reduce emotional decision-making during volatility.
+
+---
+
+## Creating Android APP
+
+* I'm assuming you've already performed the steps mentioned in Getting Started Section
+
+1. **Install Buildozer:** Install Buildozer
+```bash
+pip3 install --user --upgrade buildozer
+```
+
+2. **Connect Android Device:** Connect your android device to the local machine, you can check if the device is connected or not by the following bash commands
+```bash
+adb devices
+# If the service needs to start
+adb start-server
+adb --help
+```
+
+3. **Update Buildozer Spec:** If needed you can change the spec info in buildozer.spec file
+
+4. **Run Buildozer:** Run Buildozer
+```bash
+buildozer -v android debug deploy run logcat > app_log.txt
+```
+* this will take a long time to build on the first run, on successful completion you'll find the apk file in bin/ folder
+* this will also create a app_log.txt file for debugging and logging
+* the apk will automatically be installed on your Android Device on success
 
 ---

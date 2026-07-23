@@ -26,7 +26,7 @@ version = 1.0.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3, flask==2.2.5, werkzeug==2.2.3, Jinja2, itsdangerous, click, android, openssl
+requirements = python3, flask, werkzeug, Jinja2, itsdangerous, click, android, openssl
 
 # (str) Presplash of the application
 presplash.filename = static/icon.png
@@ -49,8 +49,7 @@ fullscreen = 1
 
 # (list) Permissions
 # (See https://python-for-android.readthedocs.io/en/latest/buildoptions/#build-options-1 for all the supported syntaxes and properties)
-android.permissions = android.permission.INTERNET, android.permission.WRITE_EXTERNAL_STORAGE, android.permission.READ_EXTERNAL_STORAGE, android.permission.ACCESS_NETWORK_STATE, 
-android.permission.WAKE_LOCK
+android.permissions = android.permission.WAKE_LOCK
 
 # (str) Android logcat filters to use
 android.logcat_filters = *:S python:D

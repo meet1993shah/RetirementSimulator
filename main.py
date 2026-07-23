@@ -171,7 +171,7 @@ if __name__ == '__main__':
     if platform.system() == 'Android':
         try:
             from android.permissions import Permission, request_permissions
-            request_permissions([Permission.INTERNET, Permission.WAKE_LOCK])
+            request_permissions([Permission.WAKE_LOCK])
         except ImportError:
             pass
     app.run(host='0.0.0.0', port=8080, debug=False, threaded=True)
