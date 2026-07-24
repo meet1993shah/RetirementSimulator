@@ -13,10 +13,10 @@ package.domain = org.test
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,html,js,css,ico,txt
+source.include_exts = py,png,html,js,css,ico,txt,csv
 
 # (list) List of inclusions using pattern matching
-source.include_patterns = static/*,templates/*,main.py
+source.include_patterns = static/*,templates/*,main.py,historical_monthly.csv,strategies/*,models/*,data/*,mote_carlo.py,simulation_engine.py,config.py
 
 # (list) List of directory to exclude (let empty to not exclude anything)
 source.exclude_dirs = tests, bin, venv, demo
