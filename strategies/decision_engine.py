@@ -26,7 +26,8 @@ class DecisionEngine:
             us_market_index, us_market_peak, intl_market_index, intl_market_peak
         )
         
-        if cls._is_portfolio_balanced(statuses):
+        if cls._is_portfolio_balanced(statuses) and not is_crash:
+            # If everything is in band and we're not in a crash, do nothing.
             return
             
         if portfolio.invested_pool <= 0.0:
@@ -34,7 +35,7 @@ class DecisionEngine:
             
         # Step 1: Primary Harvest Action
         harvested_proceeds = cls._harvest_overweight_assets(
-            portfolio, statuses, us_target, intl_target, bond_target
+            portfolio, statuses, us_target, intl_target, bond_target, is_crash
         )
         
         # Step 2: Top off Cash Buffer
@@ -80,25 +81,41 @@ class DecisionEngine:
     # ---------------------------------------------------------
 
     @staticmethod
-    def _harvest_overweight_assets(portfolio, statuses, us_target, intl_target, bond_target):
-        """Sells assets that exceed their target bands and returns total proceeds."""
+    def _harvest_overweight_assets(portfolio, statuses, us_target, intl_target, bond_target, is_crash):
+        """Sells assets based on market regime and returns total proceeds."""
         proceeds = 0.0
         total_inv = portfolio.invested_pool
         
-        if statuses['us'] == "Over":
-            harvest = portfolio.us_stocks - (total_inv * us_target)
-            portfolio.us_stocks -= harvest
-            proceeds += harvest
-            
-        if statuses['intl'] == "Over":
-            harvest = portfolio.intl_stocks - (total_inv * intl_target)
-            portfolio.intl_stocks -= harvest
-            proceeds += harvest
-            
-        if statuses['bond'] == "Over":
-            harvest = portfolio.bonds - (total_inv * bond_target)
-            portfolio.bonds -= harvest
-            proceeds += harvest
+        if is_crash:
+            # In a crash, bonds act as a primary emergency reserve. Sell down bonds and ANY overweight intl to buy discounted stocks
+            if statuses['bond'] in ["Over", "In-Band"]:
+                harvest = max(0.0, portfolio.bonds - (total_inv * bond_target))
+                portfolio.bonds -= harvest
+                proceeds += harvest
+            if statuses['intl'] == "Over":
+                harvest = portfolio.intl_stocks - (total_inv * intl_target)
+                portfolio.intl_stocks -= harvest
+                proceeds += harvest
+            if statuses['us'] == "Over":
+                harvest = portfolio.us_stocks - (total_inv * us_target)
+                portfolio.us_stocks -= harvest
+                proceeds += harvest
+        else:
+            # Normal harvest action for overweight assets
+            if statuses['us'] == "Over":
+                harvest = portfolio.us_stocks - (total_inv * us_target)
+                portfolio.us_stocks -= harvest
+                proceeds += harvest
+                
+            if statuses['intl'] == "Over":
+                harvest = portfolio.intl_stocks - (total_inv * intl_target)
+                portfolio.intl_stocks -= harvest
+                proceeds += harvest
+                
+            if statuses['bond'] == "Over":
+                harvest = portfolio.bonds - (total_inv * bond_target)
+                portfolio.bonds -= harvest
+                proceeds += harvest
             
         return proceeds
 

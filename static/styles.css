@@ -8,23 +8,35 @@
 body { 
     background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%); 
     color: #1f2937; 
-    padding: 2.5rem 1.5rem; 
-    min-height: 100vh;
+    /* Force body to exactly 100% of viewport height and disable page scroll */
+    height: 100vh; 
+    width: 100vw;
+    overflow: hidden; 
+    padding: 0.5rem; 
+    display: flex;
+    flex-direction: column;
 }
 
 .container { 
     max-width: 1400px; 
+    width: 100%;
     margin: 0 auto; 
     background: #ffffff; 
-    padding: 2.5rem; 
-    border-radius: 16px; 
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); 
+    padding: 1rem; 
+    border-radius: 12px; 
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); 
+    display: flex;
+    flex-direction: column;
+    /* Take up full height of body minus padding */
+    flex: 1; 
+    min-height: 0; 
 }
 
 header { 
-    margin-bottom: 1.5rem; 
-    border-bottom: 3px solid #f3f4f6; 
-    padding-bottom: 1.25rem; 
+    margin-bottom: 0.75rem; 
+    border-bottom: 2px solid #f3f4f6; 
+    padding-bottom: 0.75rem; 
+    flex-shrink: 0; /* Prevent header from squishing */
 }
 
 .header-title-row {
@@ -34,28 +46,21 @@ header {
 }
 
 header h1 { 
-    font-size: 2.1rem; 
+    font-size: 1.25rem; 
     font-weight: 800; 
     background: linear-gradient(90deg, #4f46e5, #db2777);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-header p { 
-    color: #4b5563; 
-    font-size: 1rem; 
-    font-weight: 500;
-    margin-top: 0.35rem; 
-}
-
 .collapse-btn {
     background: #e0e7ff;
     color: #4338ca;
     border: 1px solid #c7d2fe;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -64,63 +69,66 @@ header p {
     background: #c7d2fe;
 }
 
-/* Top and Bottom Layout Structure */
 .main-layout { 
     display: flex; 
     flex-direction: column; 
-    gap: 1.5rem; 
+    gap: 0.75rem; 
+    flex: 1;
+    min-height: 0; /* Required for nested flex children to shrink */
 }
 
 .control-panel { 
     background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); 
-    padding: 1.5rem; 
-    border-radius: 12px; 
+    padding: 1rem; 
+    border-radius: 8px; 
     border: 1px solid #e2e8f0; 
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
-    overflow: hidden;
-    transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
-    max-height: 1000px;
+    flex-shrink: 0;
+    /* Constrain height on small screens and allow internal scroll for inputs */
+    max-height: 45vh; 
+    overflow-y: auto;
+    transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease, margin 0.3s ease;
 }
 
 .control-panel.collapsed {
     max-height: 0;
     padding-top: 0;
     padding-bottom: 0;
+    margin: 0;
     opacity: 0;
     border: none;
+    overflow: hidden;
 }
 
-/* Inputs Organized into a Responsive Grid */
 .inputs-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.2rem;
+    /* Auto-collapse to fewer columns on mobile */
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
 }
 
 .input-group label { 
     display: block; 
-    font-size: 0.82rem; 
+    font-size: 0.75rem; 
     font-weight: 700; 
     color: #334155; 
-    margin-bottom: 0.3rem; 
+    margin-bottom: 0.2rem; 
 }
 
 .input-group input { 
     width: 100%; 
-    padding: 0.55rem 0.75rem; 
-    border: 2px solid #cbd5e1; 
-    border-radius: 8px; 
-    font-size: 0.95rem; 
+    padding: 0.4rem 0.6rem; 
+    border: 1px solid #cbd5e1; 
+    border-radius: 6px; 
+    font-size: 0.9rem; 
     background: #fff;
     color: #0f172a;
-    transition: all 0.2s ease;
 }
 
 .input-group input:focus {
     outline: none;
     border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
 }
 
 #run-btn { 
@@ -128,18 +136,16 @@ header p {
     background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); 
     color: white; 
     border: none; 
-    padding: 0.85rem; 
-    border-radius: 8px; 
+    padding: 0.6rem; 
+    border-radius: 6px; 
     font-weight: 700; 
-    font-size: 1rem;
+    font-size: 0.95rem;
     cursor: pointer; 
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
     transition: all 0.2s ease; 
 }
 
 #run-btn:hover { 
     background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%); 
-    box-shadow: 0 6px 15px rgba(79, 70, 229, 0.4);
     transform: translateY(-1px);
 }
 
@@ -148,28 +154,27 @@ header p {
     flex-direction: column; 
     background: #f8fafc; 
     border: 1px solid #e2e8f0; 
-    border-radius: 12px; 
-    min-height: 600px; 
-    padding: 1.5rem; 
-    position: relative; 
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+    border-radius: 8px; 
+    padding: 1rem; 
+    flex: 1; /* Automatically fill remaining vertical space */
+    min-height: 0; 
 }
 
 .placeholder-text { 
     color: #64748b; 
     font-weight: 600; 
-    font-size: 0.95rem;
-    margin-bottom: 1rem; 
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem; 
+    flex-shrink: 0;
 }
 
 .chart-container { 
     position: relative; 
     width: 100%; 
-    flex-grow: 1; 
-    height: 520px; 
+    flex: 1; /* Forces Chart.js to scale dynamically to the container */
+    min-height: 0; 
     background: #ffffff;
-    padding: 1rem;
-    border-radius: 8px;
+    padding: 0.5rem;
+    border-radius: 6px;
     border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }

@@ -7,6 +7,6 @@ class MarketState:
         self.intl_return = float(row['intl_stock_return'])
         self.intl_dividend = float(row['intl_stock_dividend'])
         self.bond_return = float(row['bond_return'])
-        self.bond_interest_rate = float(row['bond_interest_rate'])
+        self.bond_interest_rate = float(row['bond_interest_rate']) / 12.0
         self.inflation = float(row['inflation'])
-        self.hysa_interest = float(row['hysa_interest'])
+        self.hysa_interest = float(row['hysa_interest']) / 12.0

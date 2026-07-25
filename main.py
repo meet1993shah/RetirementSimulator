@@ -18,7 +18,6 @@ def stream_simulation():
     bond_alloc = float(data.get('bond_alloc', 20)) / 100.0
     n_sims = int(data.get('n_sims', 1000))
     n_years = int(data.get('n_years', 65))
-    block_size = int(data.get('block_size', 5))
     drift_pct = float(data.get('drift_pct', 5)) / 100.0
     drawdown_pct = float(data.get('drawdown_pct', 20)) / 100.0
     initial_swr = float(data.get('initial_swr', 1)) / 100.0
@@ -27,7 +26,7 @@ def stream_simulation():
 
     return Response(
         MonteCarloSimulator.stream_simulation(
-            us_alloc, intl_alloc, bond_alloc, n_sims, n_years, block_size, drift_pct, drawdown_pct, initial_swr, step_swr, success_threshold
+            us_alloc, intl_alloc, bond_alloc, n_sims, n_years, drift_pct, drawdown_pct, initial_swr, step_swr, success_threshold
         ), 
         mimetype='text/event-stream'
     )

@@ -17,21 +17,18 @@ document.getElementById('sim-form').addEventListener('submit', function(e) {
     const controlPanel = document.getElementById('control-panel');
     controlPanel.classList.add('collapsed');
     document.getElementById('collapse-btn').textContent = 'Expand Inputs 🔽';
-    
-    const successThreshold = parseFloat(document.getElementById('success_threshold').value) || 90;
-    
+
     const payload = {
         us_alloc: document.getElementById('us_alloc').value,
         intl_alloc: document.getElementById('intl_alloc').value,
         bond_alloc: document.getElementById('bond_alloc').value,
         n_sims: document.getElementById('n_sims').value,
         n_years: document.getElementById('n_years').value,
-        block_size: document.getElementById('block_size').value,
         drift_pct: document.getElementById('drift_pct').value,
         drawdown_pct: document.getElementById('drawdown_pct').value,
         initial_swr: document.getElementById('initial_swr').value,
         step_swr: document.getElementById('step_swr').value,
-        success_threshold: successThreshold
+        success_threshold: document.getElementById('success_threshold').value
     };
     
     // Destroy existing chart if present
@@ -58,13 +55,13 @@ document.getElementById('sim-form').addEventListener('submit', function(e) {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: false, // Essential for flexbox dynamic resizing
             scales: {
                 x: {
                     title: { display: true, text: 'Initial Withdrawal Rate (%)' }
                 },
                 y: {
-                    min: Math.max(0, successThreshold - 5),
+                    min: Math.max(0, success_threshold - 2),
                     max: 100,
                     ticks: {
                         stepSize: 1

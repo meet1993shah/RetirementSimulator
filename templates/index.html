@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Retirement Portfolio Simulator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <!-- Include Chart.js for real-time plotting -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 <body>
     <div class="container">
@@ -20,44 +20,39 @@
         </header>
 
         <div class="main-layout">
-            <!-- Top Panel: Inputs Card -->
             <section class="control-panel" id="control-panel">
                 <form id="sim-form">
                     <div class="inputs-grid">
                         <div class="input-group">
-                            <label>US Equities Allocation (%)</label>
+                            <label>US Equities (%)</label>
                             <input type="number" id="us_alloc" value="60" step="1">
                         </div>
                         <div class="input-group">
-                            <label>Intl Equities Allocation (%)</label>
+                            <label>Intl Equities (%)</label>
                             <input type="number" id="intl_alloc" value="20" step="1">
                         </div>
                         <div class="input-group">
-                            <label>Bonds Allocation (%)</label>
+                            <label>Bonds (%)</label>
                             <input type="number" id="bond_alloc" value="20" step="1">
                         </div>
                         <div class="input-group">
-                            <label>Number of Simulations</label>
-                            <input type="number" id="n_sims" value="500" step="100">
+                            <label>Simulations</label>
+                            <input type="number" id="n_sims" value="1000" step="1">
                         </div>
                         <div class="input-group">
-                            <label>Retirement Horizon (Years)</label>
+                            <label>Horizon (Years)</label>
                             <input type="number" id="n_years" value="65" step="1">
                         </div>
                         <div class="input-group">
-                            <label>Block Size (Years)</label>
-                            <input type="number" id="block_size" value="5" step="1">
-                        </div>
-                        <div class="input-group">
-                            <label>US Drift Threshold (%)</label>
+                            <label>Drift (%)</label>
                             <input type="number" id="drift_pct" value="5" step="0.5">
                         </div>
                         <div class="input-group">
-                            <label>Bear Market Drawdown (%)</label>
+                            <label>Drawdown (%)</label>
                             <input type="number" id="drawdown_pct" value="20" step="1">
                         </div>
                         <div class="input-group">
-                            <label>Initial SWR (%)</label>
+                            <label>Init SWR (%)</label>
                             <input type="number" id="initial_swr" value="1" step="0.05">
                         </div>
                         <div class="input-group">
@@ -65,7 +60,7 @@
                             <input type="number" id="step_swr" value="0.05" step="0.05">
                         </div>
                         <div class="input-group">
-                            <label>Success Threshold (%)</label>
+                            <label>Success (%)</label>
                             <input type="number" id="success_threshold" value="90" step="1">
                         </div>
                     </div>
@@ -73,9 +68,8 @@
                 </form>
             </section>
 
-            <!-- Bottom Panel: Chart Output -->
             <main class="output-panel">
-                <div id="status-text" class="placeholder-text">Configure parameters and click run to stream results live.</div>
+                <div id="status-text" class="placeholder-text">Configure parameters and click run.</div>
                 <div class="chart-container">
                     <canvas id="simChart"></canvas>
                 </div>
