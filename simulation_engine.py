@@ -44,16 +44,16 @@ class SimulationEngine:
                 return False
                 
             # Phase 4: Strategic Portfolio Rebalancing (Semi-Annually)
-            # if (num_month % 12 == 0) or (num_month % 12 == 6):
-            # 1. Calculate inflation-adjusted spending budget
-            current_monthly_spending *= cumulative_inflation
-            cumulative_inflation = 1.0  # Reset for the next 6-month window
-            
-            # 2. Check asset weights, drawdowns, and execute decision matrix
-            DecisionEngine.execute_harvest_and_rebalance(
-                portfolio, us_alloc, intl_alloc, bond_alloc, drift_pct, drawdown_pct, current_monthly_spending,
-                us_market_index, us_market_peak, intl_market_index, intl_market_peak
-            )
+            if (num_month % 12 == 0) or (num_month % 12 == 6):
+                # 1. Calculate inflation-adjusted spending budget
+                current_monthly_spending *= cumulative_inflation
+                cumulative_inflation = 1.0  # Reset for the next 6-month window
+                
+                # 2. Check asset weights, drawdowns, and execute decision matrix
+                DecisionEngine.execute_harvest_and_rebalance(
+                    portfolio, us_alloc, intl_alloc, bond_alloc, drift_pct, drawdown_pct, current_monthly_spending,
+                    us_market_index, us_market_peak, intl_market_index, intl_market_peak
+                )
                 
         return True
 

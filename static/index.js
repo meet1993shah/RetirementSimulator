@@ -61,8 +61,8 @@ document.getElementById('sim-form').addEventListener('submit', function(e) {
                     title: { display: true, text: 'Initial Withdrawal Rate (%)' }
                 },
                 y: {
-                    min: Math.max(0, success_threshold - 2),
-                    max: 100,
+                    min: Math.max(0, success_threshold - 5),
+                    max: 105,
                     ticks: {
                         stepSize: 1
                     },

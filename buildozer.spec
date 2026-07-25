@@ -36,7 +36,10 @@ icon.filename = static/icon.png
 
 # (list) Supported orientations
 # Valid options are: landscape, portrait, portrait-reverse or landscape-reverse
-orientation = landscape,landscape-reverse
+orientation = landscape
+
+# Add this line right below orientation to enforce landscape at the Android manifest level
+android.manifest.orientation = landscape
 
 # change the major version of python used by the app
 osx.python_version = 3
